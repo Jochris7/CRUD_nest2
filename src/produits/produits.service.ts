@@ -1,11 +1,13 @@
 import {
   ConflictException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  HttpException,
 } from '@nestjs/common';
 import { CreateProduitDto } from './dto/create-produit.dto';
-//import { UpdateProduitDto } from './dto/update-produit.dto';
+import { UpdateProduitDto } from './dto/update-produit.dto';
 import { Produit } from './entities/produit.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -46,18 +48,39 @@ export class ProduitsService {
         throw new NotFoundException();
       }
       console.log(produitTrouvé);
-      return produitTrouvé;
+      return { data: produitTrouvé };
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException();
     }
   }
 
-  /*update(id: number, updateProduitDto: UpdateProduitDto) {
-    return `This action updates a #${id} produit`;
-  }*/
+  async update(id: string, updateProduitDto: UpdateProduitDto) {
+    try {
+      const product = await this.produitRepository.findOneBy({ id });
+      if (!product) {
+        throw new HttpException('Produits non trouvé', HttpStatus.NOT_FOUND);
+      }
+      const updateProduct = Object.assign(product, updateProduitDto);
+      return this.produitRepository.save(updateProduct);
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('');
+    }
+  }
 
-  remove(id: number) {
-    return `This action removes a #${id} produit`;
+  async remove(id: string) {
+    try {
+      const productSelected = await this.produitRepository.findOneBy({ id });
+      if (!productSelected) {
+        throw new NotFoundException();
+      }
+      return await this.produitRepository.remove(productSelected);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException();
+    }
   }
 }

@@ -23,6 +23,7 @@ export class ProduitsController {
   }
 
   @Get()
+  @HttpCode(HttpStatus.ACCEPTED)
   findAll() {
     return this.produitsService.findAll();
   }
@@ -40,7 +41,8 @@ export class ProduitsController {
   }*/
 
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   remove(@Param('id') id: string) {
-    return this.produitsService.remove(+id);
+    return this.produitsService.remove(id);
   }
 }
